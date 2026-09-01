@@ -20,26 +20,12 @@ class BusRoute:
 class BusStop:
     stop_id: str
     stop_name: str
-    latitude: float | None = None
-    longitude: float | None = None
+    global_id: str
 
 @dataclass(frozen=True)
 class BusArrival:
     raw_time: str      # Для сортировки (например, "24:15:00")
     display_time: str  # Для экрана (например, "00:15")
-
-ROUTE_TYPE_RU = {
-    "0": "Трамвай",
-    "1": "Метро",
-    "2": "Поезд",
-    "3": "Автобус",
-    "4": "Паром",
-    "5": "Канатный трамвай",
-    "6": "Канатная дорога",
-    "7": "Фуникулер",
-    "11": "Троллейбус",
-    "12": "Монорельс"
-}
 
 class MoscowBusApiClient:
     def __init__(self, session: aiohttp.ClientSession, api_key: str) -> None:
@@ -61,6 +47,19 @@ class MoscowBusApiClient:
             raise err
 
     async def search_routes(self, route_number: str) -> list[BusRoute]:
+        ROUTE_TYPE_RU = {
+            "0": "Трамвай",
+            "1": "Метро",
+            "2": "Поезд",
+            "3": "Автобус",
+            "4": "Паром",
+            "5": "Канатный трамвай",
+            "6": "Канатная дорога",
+            "7": "Фуникулер",
+            "11": "Троллейбус",
+            "12": "Монорельс"
+        }
+        
         filter_str = f"route_short_name eq '{route_number.replace("'", "''")}'"
         data = await self._make_request("60664", filter_str)
         return [
@@ -83,19 +82,16 @@ class MoscowBusApiClient:
                 stops.append(BusStop(
                     stop_id=str(cells.get("stop_id")),
                     stop_name=str(cells.get("stop_name")),
-                    latitude=cells.get("Latitude"),
-                    longitude=cells.get("Longitude")
+                    global_id=str(cells.get("global_id"))
                 ))
         return stops
 
-    async def get_timetable(self, stop_id: str, route_id: str) -> list[BusArrival]:
-        """Единая точка входа для получения расписания."""
+    async def get_active_services_for_today(self, route_id: str) -> list[str]:
         now = dt_util.now()
         today_str = now.strftime("%Y%m%d")
         weekday_name = now.strftime("%A").lower()
         threshold_str = (now - timedelta(minutes=5)).strftime("%H:%M:%S")
 
-        # 1. Календари рейсов
         trips_data = await self._make_request("60665", f"route_id eq '{route_id.replace("'", "''")}'")
         service_ids = {str(i.get("Cells", {}).get("service_id")) for i in trips_data if i.get("Cells", {}).get("service_id")}
         
@@ -107,12 +103,12 @@ class MoscowBusApiClient:
                 if cells.get("start_date", "") <= today_str <= cells.get("end_date", "") and str(cells.get(weekday_name, 0)) == "1":
                     active_services.append(s_id)
                     break
+        return active_services
 
-        if not active_services:
-            return []
+    async def get_timetable(self, stop_id: str, route_id: str, active_services: list[str]) -> list[BusArrival]:
 
-        # 2. Расписание остановки
         timetable_data = await self._make_request("60661", f"stop_id eq {stop_id}")
+
         arrivals = []
         prefix = f"{route_id}_"
 
@@ -123,7 +119,7 @@ class MoscowBusApiClient:
             
             if trip_id and arrival_time and trip_id.startswith(prefix):
                 trip_parts = trip_id.split("_")
-                if len(trip_parts) >= 2 and trip_parts[1] in active_services and arrival_time >= threshold_str:
+                if len(trip_parts) >= 2 and trip_parts[1] in active_services:
                     time_parts = arrival_time.split(":")
                     hours = int(time_parts[0])
                     if hours >= 24:

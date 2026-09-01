@@ -24,9 +24,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     async def _async_update_data():
         try:
-            return await client.get_timetable(entry.data[CONF_STOP_ID], entry.data[CONF_ROUTE_ID])
+            active_services = await client.get_active_services_for_today(route_id)
+            if not active_services:
+                return []
+            return await client.get_timetable(stop_id, route_id, active_services)
         except Exception as err:
-            raise UpdateFailed(f"Ошибка обновления API: {err}")
+            raise UpdateFailed(f"Ошибка обновления API для остановки {stop_id}: {err}")
 
     coordinator = DataUpdateCoordinator(
         hass,

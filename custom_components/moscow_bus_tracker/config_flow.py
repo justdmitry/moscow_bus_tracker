@@ -72,12 +72,9 @@ class MoscowBusTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 for stop in stops_data:
                     self._clean_stop_names[stop.stop_id] = stop.stop_name
-                    if stop.latitude and stop.longitude:
-                        self._ui_stops_options[stop.stop_id] = f"{stop.stop_name} [ID: {stop.stop_id}] [{stop.latitude}, {stop.longitude}]"
-                        map_url = f"https://yandex.ru{stop.longitude},{stop.latitude}&z=18&pt={stop.longitude},{stop.latitude},pm2rdm"
-                        links_list.append(f"* [Открыть на Яндекс.Картах: Остановка {stop.stop_id}]({map_url})")
-                    else:
-                        self._ui_stops_options[stop.stop_id] = f"{stop.stop_name} [ID: {stop.stop_id}]"
+                    self._ui_stops_options[stop.stop_id] = f"{stop.stop_name} [ID: {stop.stop_id}]"
+                    map_url = f"https://data.mos.ru/opendata/60662?objectId={stop.global_id}&filter=global_id%3D{stop.global_id}"
+                    links_list.append(f"* [{stop.stop_name} (ID: {stop.stop_id})]({map_url})")
 
                 if not self._ui_routes_options:
                     errors[CONF_ROUTE_NUMBER] = "route_not_found"
