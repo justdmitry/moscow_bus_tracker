@@ -127,5 +127,6 @@ class MoscowBusApiClient:
                     display_time = f"{hours:02d}:{time_parts[1]}"
                     arrivals.append(BusArrival(raw_time=arrival_time, display_time=display_time))
 
-        arrivals.sort(key=lambda x: x.raw_time)
+        arrivals = {a.raw_time: a for a in arrivals}.values() # distinct
+        arrivals = sorted(arrivals, key=lambda x: x.raw_time) # sort
         return arrivals
