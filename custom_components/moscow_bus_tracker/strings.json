@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": " Moscow Bus Tracker (Mos.ru)",
+        "description": "Введите ваш API-ключ открытых данных Москвы.",
+        "data": {
+          "api_key": "API Ключ"
+        }
+      },
+      "route": {
+        "title": "Выбор маршрута",
+        "description": "Введите номер маршрута (например, 123) и часть названия остановки.",
+        "data": {
+          "route_number": "Номер маршрута",
+          "stop_search_query": "Остановка",
+          "scan_interval": "Интервал опроса (в минутах)"
+        }
+      },
+      "stop": {
+        "title": "Выбор остановки",
+        "description": "Проверьте расположение остановок на карте:\n\n{map_links}\n\nВыберите нужную остановку из списка ниже:",
+        "data": {
+          "stop_id": "Остановка"
+        }
+      }
+    },
+    "error": {
+      "route_not_found": "Маршрут не найден.",
+      "no_stops_found": "Остановки с таким названием не найдены.",
+      "cannot_connect": "Ошибка сети.",
+      "api_error": "Ошибка API Mos.ru"
+    }
+  }
+}

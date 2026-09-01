@@ -1,0 +1,6 @@
+{
+  "name": "Moscow Bus Tracker (via data.mos.ru)",
+  "type": "integration",
+  "homeassistant": "2025.1.0",
+  "render_readme": true
+}
