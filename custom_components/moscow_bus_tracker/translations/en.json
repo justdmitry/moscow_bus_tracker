@@ -1,5 +1,24 @@
 {
+  "common": {
+    "route_type_names": {
+      "0": "Tram",
+      "1": "Subway",
+      "2": "Rail",
+      "3": "Bus",
+      "4": "Ferry",
+      "5": "Cable tram",
+      "6": "Cable car",
+      "7": "Funicular",
+      "11": "Trolleybus",
+      "12": "Monorail",
+      "default": "Route"
+    }
+  },
   "config": {
+    "flow_title": "API Key {masked_key}",
+    "initiate_flow": {
+      "user": "Add API Key"
+    },
     "step": {
       "user": {
         "title": "Connecting to data.mos.ru",
@@ -7,30 +26,58 @@
         "data": {
           "api_key": "API Key"
         }
-      },
-      "route": {
-        "title": "Search for Route and Stop",
-        "description": "Type full roune number (ex. 123) and part of stop name.\n\nImportant: type stop name in Russian, with correct upper/lower case letters!",
-        "data": {
-          "route_number": "Route number",
-          "stop_search_query": "Stop name (part)",
-          "scan_interval": "Update interval (in minutes)"
-        }
-      },
-      "stop": {
-        "title": "Confirm Route and Stop",
-        "description": "If you several stops - check their exact location using links. You need to choose one that is on the correct side of the road:\n\n{map_links}",
-        "data": {
-          "route_id": "Route",
-          "stop_id": "Stop"
-        }
       }
     },
     "error": {
+      "invalid_auth": "Invalid auth key.",
+      "request_error": "API request failed.",
       "route_not_found": "Route not found.",
-      "no_stops_found": "Stops not found.",
-      "cannot_connect": "Network error.",
-      "api_error": "Mos.ru API error"
+      "no_stops_found": "No stops found.",
+      "empty_field": "Non-empty value required"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Data update interval (from server, in minutes)",
+          "show_missed": "How long to display departed vehicles (in minutes)",
+          "newday_shift": "How late does night transport operates (after midnight, in minutes)"
+        }
+      }
+    }
+  },
+  "config_subentries": {
+    "route": {
+      "flow_title": "{route_type} {route_name}: {stop_name}",
+      "initiate_flow": {
+        "user": "Add Route"
+      },
+      "step": {
+        "user": {
+          "title": "Search for Route and Stop",
+          "description": "Type full roune number (ex. 123) and part of stop name.\n\nImportant: type stop name in Russian, with correct upper/lower case letters!",
+          "data": {
+            "route_number": "Route number",
+            "stop_search_query": "Stop name (part)"
+          }
+        },
+        "choice": {
+          "title": "Confirm Route and Stop",
+          "description": "If you got several stops - check their exact location using links. You need to choose one that is on the correct side of the road:\n\n{map_links}",
+          "data": {
+            "route_id": "Route",
+            "stop_id": "Stop"
+          }
+        }
+      },
+      "error": {
+        "invalid_auth": "Invalid auth key.",
+        "request_error": "API request failed.",
+        "route_not_found": "Route not found.",
+        "no_stops_found": "No stops found.",
+        "empty_field": "Non-empty value required"
+      }
     }
   }
 }

@@ -2,11 +2,14 @@
   "domain": "moscow_bus_tracker",
   "name": "Moscow Bus Tracker (via data.mos.ru)",
   "documentation": "https://github.com/justdmitry/moscow_bus_tracker",
-  "dependencies": [],
-  "codeowners": ["@justdmitry"],
+  "dependencies": [
+    "frontend",
+    "http"
+  ],
+  "codeowners": [ "@justdmitry" ],
   "requirements": [],
-  "version": "0.3.0",
+  "version": "0.4.0",
   "iot_class": "cloud_polling",
   "config_flow": true,
-  "homeassistant": "2025.1.0"
+  "homeassistant": "2026.9.2"
 }
