@@ -8,7 +8,7 @@
   ],
   "codeowners": [ "@justdmitry" ],
   "requirements": [],
-  "version": "0.4.0",
+  "version": "0.5.0",
   "iot_class": "cloud_polling",
   "config_flow": true,
   "homeassistant": "2026.9.2"

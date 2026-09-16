@@ -40,9 +40,16 @@
     "step": {
       "init": {
         "data": {
+          "arriving_badge": "Custom 'icon-badge' when displaying arriving vehicle",
+          "arriving_color": "Custom 'icon-color' when displaying arriving vehicle",
+          "arriving_interval": "When highlight \"arriving\" vehicle (in minutes)",
+          "missed_badge": "Custom 'icon-badge' when displaying departed (missed) vehicle",
+          "missed_color": "Custom 'icon-color' when displaying departed (missed) vehicle",
+          "missed_interval": "How long to display departed (missed) vehicles (in minutes)",
+          "newday_shift": "How late does night transport operates (after midnight, in minutes)",
+          "upcoming_count": "How many \"upcoming\" vehicles (times) to show",
           "update_interval": "Data update interval (from server, in minutes)",
-          "show_missed": "How long to display departed vehicles (in minutes)",
-          "newday_shift": "How late does night transport operates (after midnight, in minutes)"
+          "default_color": "Default 'icon-color' value"
         }
       }
     }

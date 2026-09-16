@@ -5,6 +5,7 @@ from homeassistant.core import callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.translation import async_get_translations
+from homeassistant.helpers.selector import IconSelector
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .const import *
@@ -75,9 +76,19 @@ class BusTrackerOptionsFlow(OptionsFlowWithReload):
             return self.async_create_entry(data=user_input)
 
         options_schema = vol.Schema({
-            vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL_MINUTES): vol.All(int, vol.Range(min=10)),
-            vol.Optional(CONF_SHOW_MISSED_INTERVAL, default=DEFAULT_SHOW_MISSED_INTERVAL_MINUTES): vol.All(int, vol.Range(min=0)),
-            vol.Optional(CONF_NEWDAY_SHIFT, default=DEFAULT_NEWDAY_SHIFT_MINUTES): int,
+            vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL_MINUTES): vol.Any(vol.All(int, vol.Range(min=10)), None),
+            vol.Optional(CONF_UPCOMING_COUNT, default=DEFAULT_UPCOMING_COUNT): vol.Any(vol.All(int, vol.Range(min=0)), None),
+            vol.Optional(CONF_NEWDAY_SHIFT, default=DEFAULT_NEWDAY_SHIFT_MINUTES): vol.Any(int, None),
+
+            vol.Optional(CONF_MISSED_INTERVAL, default=DEFAULT_MISSED_INTERVAL_MINUTES): vol.Any(vol.All(int, vol.Range(min=0)), None),
+            vol.Optional(CONF_MISSED_COLOR, default=DEFAULT_MISSED_COLOR): vol.Any(str, None),
+            vol.Optional(CONF_MISSED_BADGE, default=DEFAULT_MISSED_BADGE): vol.Any(IconSelector(), None),
+
+            vol.Optional(CONF_ARRIVING_INTERVAL, default=DEFAULT_ARRIVING_INTERVAL_MINUTES): vol.Any(vol.All(int, vol.Range(min=0)), None),
+            vol.Optional(CONF_ARRIVING_COLOR, default=DEFAULT_ARRIVING_COLOR): vol.Any(str, None),
+            vol.Optional(CONF_ARRIVING_BADGE, default=DEFAULT_ARRIVING_BADGE): vol.Any(IconSelector(), None),
+
+            vol.Optional(CONF_DEFAULT_COLOR, default=DEFAULT_DEFAULT_COLOR): vol.Any(str, None),
         })
 
         return self.async_show_form(

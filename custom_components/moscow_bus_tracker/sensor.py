@@ -23,9 +23,9 @@ async def async_setup_entry(
     entities = []
 
     api_client = entry.runtime_data
-    update_interval = entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_MINUTES)
-    show_missed_interval = entry.options.get(CONF_SHOW_MISSED_INTERVAL, DEFAULT_SHOW_MISSED_INTERVAL_MINUTES)
+
     newday_shift_interval = entry.options.get(CONF_NEWDAY_SHIFT, DEFAULT_NEWDAY_SHIFT_MINUTES)
+    update_interval = entry.options.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_MINUTES)
 
     for subentry in entry.subentries.values():
         coordinator = BusTrackerCoordinator(
@@ -39,7 +39,11 @@ async def async_setup_entry(
 
         await coordinator.async_config_entry_first_refresh()
 
-        entities.append(BusArrivalSensor(coordinator, subentry, timedelta(minutes=show_missed_interval)))
+        entities.append(BusArrivalSensor(
+            coordinator,
+            entry,
+            subentry,
+        ))
 
     async_add_entities(entities)
 
@@ -60,11 +64,17 @@ def get_route_type_icon(route_type):
 
 class BusArrivalSensor(CoordinatorEntity, SensorEntity):
 
-    def __init__(self, coordinator, subentry, show_missed):
+    def __init__(self, coordinator, entry, subentry):
         super().__init__(coordinator)
 
-        self._subentry = subentry
-        self._show_missed = show_missed
+        self._upcoming_count = entry.options.get(CONF_UPCOMING_COUNT, DEFAULT_UPCOMING_COUNT)
+        self._missed_interval = timedelta(minutes=entry.options.get(CONF_MISSED_INTERVAL, DEFAULT_MISSED_INTERVAL_MINUTES))
+        self._missed_color = entry.options.get(CONF_MISSED_COLOR, DEFAULT_MISSED_COLOR)
+        self._missed_badge = entry.options.get(CONF_MISSED_BADGE, DEFAULT_MISSED_BADGE)
+        self._arriving_interval = timedelta(minutes=entry.options.get(CONF_ARRIVING_INTERVAL, DEFAULT_ARRIVING_INTERVAL_MINUTES))
+        self._arriving_color = entry.options.get(CONF_ARRIVING_COLOR, DEFAULT_ARRIVING_COLOR)
+        self._arriving_badge = entry.options.get(CONF_ARRIVING_BADGE, DEFAULT_ARRIVING_BADGE)
+        self._default_color = entry.options.get(CONF_DEFAULT_COLOR, DEFAULT_DEFAULT_COLOR)
 
         self._route_id = subentry.data[CONF_ROUTE_ID]
         self._route_type = subentry.data[CONF_ROUTE_TYPE]
@@ -73,8 +83,9 @@ class BusArrivalSensor(CoordinatorEntity, SensorEntity):
         self._stop_id = subentry.data[CONF_STOP_ID]
         self._stop_name = subentry.data[CONF_STOP_NAME]
 
-        self._attr_name = subentry.title
         self.entity_id = f"sensor.{subentry.unique_id}"
+        self._attr_attribution = "Data provided by Open Data Portal of Moscow Government"
+        self._attr_name = subentry.title
         self._attr_unique_id = f"{DOMAIN}.{subentry.unique_id}"
         self._attr_icon = get_route_type_icon(self._route_type)
 
@@ -94,16 +105,21 @@ class BusArrivalSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        valid_arrivals, _ = self._get_filtered_arrivals()
+        valid_arrivals, _, _ = self._get_filtered_arrivals()
         if valid_arrivals:
             return valid_arrivals[0].display_time
 
     @property
     def extra_state_attributes(self):
-        valid_arrivals, missed = self._get_filtered_arrivals()
-        upcoming = [arrival.display_time for arrival in valid_arrivals[1:]][:5] # next five times
+        valid_arrivals, missed, arriving = self._get_filtered_arrivals()
+        upcoming = [] if self._upcoming_count <= 0 else [arrival.display_time for arrival in valid_arrivals[1:]][:self._upcoming_count]
+        icon_color = self._missed_color if missed else (self._arriving_color if arriving else self._default_color)
+        icon_badge = self._missed_badge if missed else (self._arriving_badge if arriving else None)
         return {
             "missed": missed,
+            "arriving": arriving,
+            "icon_color": icon_color,
+            "icon_badge": icon_badge,
             "upcoming": upcoming,
             "route_id": self._route_id,
             "route_type": self._route_type,
@@ -113,15 +129,21 @@ class BusArrivalSensor(CoordinatorEntity, SensorEntity):
             "stop_name": self._stop_name,
         }
 
-    def _get_filtered_arrivals(self) -> tuple[list, bool]:
+    def _get_filtered_arrivals(self) -> tuple[list, bool, bool]:
         all_arrivals = self.coordinator.data
         if not all_arrivals:
-            return []
-        now = dt_util.now()
-        threshold = (now - self._show_missed)
-        now_str = now.strftime("%H:%M:%S")
-        threshold_str = threshold.strftime("%H:%M:%S")
+            return [], false, false
 
-        filtered = [arrival for arrival in all_arrivals if arrival.raw_time >= threshold_str]
-        less_than_now = bool(filtered and filtered[0].raw_time <= now_str)
-        return filtered, less_than_now
+        now = dt_util.now()
+        now_str = now.strftime("%H:%M:%S")
+        threshold_missed = (now - self._missed_interval)
+        threshold_missed_str = threshold_missed.strftime("%H:%M:%S")
+
+        threshold_arriving = (now + self._arriving_interval)
+        threshold_arriving_str = threshold_arriving.strftime("%H:%M:%S")
+
+        filtered = [arrival for arrival in all_arrivals if arrival.raw_time >= threshold_missed_str]
+        missed = bool(filtered and filtered[0].raw_time <= now_str)
+        arriving = bool(filtered and filtered[0].raw_time <= threshold_arriving_str)
+
+        return filtered, missed, arriving

@@ -2,8 +2,15 @@ DOMAIN = "moscow_bus_tracker"
 
 CONF_API_KEY = "api_key"
 CONF_UPDATE_INTERVAL = "update_interval"
-CONF_SHOW_MISSED_INTERVAL = "show_missed"
+CONF_UPCOMING_COUNT = "upcoming_count"
 CONF_NEWDAY_SHIFT = "newday_shift"
+CONF_MISSED_INTERVAL = "missed_interval"
+CONF_MISSED_COLOR = "missed_color"
+CONF_MISSED_BADGE = "missed_badge"
+CONF_ARRIVING_INTERVAL = "arriving_interval"
+CONF_ARRIVING_COLOR = "arriving_color"
+CONF_ARRIVING_BADGE = "arriving_badge"
+CONF_DEFAULT_COLOR = "default_color"
 
 CONF_ROUTE_NUMBER = "route_number"
 CONF_STOPS_QUERY = "stops_query"
@@ -18,20 +25,12 @@ CONF_ROUTE_LONG_NAME = "route_long_name"
 CONF_STOP_NAME = "stop_name"
 
 DEFAULT_UPDATE_INTERVAL_MINUTES = 60
-DEFAULT_SHOW_MISSED_INTERVAL_MINUTES = 3
+DEFAULT_UPCOMING_COUNT = 5
 DEFAULT_NEWDAY_SHIFT_MINUTES = 180
-
-## List of JavaScript modules to register
-#JSMODULES: Final[list[dict[str, str]]] = [
-#    {
-#        "name": "Bus Card",
-#        "filename": "bus-card.js",
-#        "version": "0.0.1",
-#    },
-#    ## Add editor if needed
-#    #{
-#    #    "name": "Bus Card Editor",
-#    #    "filename": "bus-card-editor.js",
-#    #    "version": "0.0.1",
-#    #},
-#]
+DEFAULT_MISSED_INTERVAL_MINUTES = 3
+DEFAULT_MISSED_COLOR = "red"
+DEFAULT_MISSED_BADGE = None
+DEFAULT_ARRIVING_INTERVAL_MINUTES = 5
+DEFAULT_ARRIVING_COLOR = "primary"
+DEFAULT_ARRIVING_BADGE = "mdi:run"
+DEFAULT_DEFAULT_COLOR = None
