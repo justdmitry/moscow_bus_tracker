@@ -132,7 +132,7 @@ class BusArrivalSensor(CoordinatorEntity, SensorEntity):
     def _get_filtered_arrivals(self) -> tuple[list, bool, bool]:
         all_arrivals = self.coordinator.data
         if not all_arrivals:
-            return [], false, false
+            return [], False, False
 
         now = dt_util.now()
         now_str = now.strftime("%H:%M:%S")
