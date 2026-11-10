@@ -4,7 +4,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import *
-from .api import MoscowOpenDataApiClient
+from .api import MoscowOpenDataApiClient, MoscowOpenDataApiError, MoscowOpenDataApiAuthError
 
 _LOGGER = logging.getLogger(__name__)
 
